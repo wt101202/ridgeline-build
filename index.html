@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ridgeline FFT .308 Build</title>
+<meta name="description" content="Scope, suppressor, ammo and kit options for a 16 in carbon .308 mountain rifle.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ridgeline FFT .308 Build">
+<meta property="og:description" content="Scope, suppressor, ammo and kit options for a 16&quot; carbon mountain rifle">
+<meta property="og:url" content="https://wt101202.github.io/ridgeline-build/">
+<meta property="og:image" content="https://wt101202.github.io/ridgeline-build/preview.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="apple-touch-icon" href="https://wt101202.github.io/ridgeline-build/preview.png">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: summary tiles and build sheet first, then one scorer panel per component, ballistics, and the kit list. */
+:root{
+  --bg:#f2f4f0; --surface:#ffffff; --sunk:#e8ebe5; --ink:#19201b; --ink2:#4d584f; --ink3:#7b857d;
+  --line:#d6dbd3; --line2:#b4bcb2; --accent:#2c6a49; --accent-soft:#dcebe1; --on-accent:#ffffff;
+  --data:#2a78d6; --ctx:#a9b0a8; --good:#17803a; --warn:#a86a00; --bad:#b83a34;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121613; --surface:#1b211c; --sunk:#232a24; --ink:#eaefe9; --ink2:#b3bdb4; --ink3:#838d85;
+  --line:#2e362f; --line2:#465047; --accent:#5fb487; --accent-soft:#1f3529; --on-accent:#0d1710;
+  --data:#4a93ea; --ctx:#5d665e; --good:#4cc277; --warn:#e0a53a; --bad:#ef7b74; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#121613; --surface:#1b211c; --sunk:#232a24; --ink:#eaefe9; --ink2:#b3bdb4; --ink3:#838d85;
+  --line:#2e362f; --line2:#465047; --accent:#5fb487; --accent-soft:#1f3529; --on-accent:#0d1710;
+  --data:#4a93ea; --ctx:#5d665e; --good:#4cc277; --warn:#e0a53a; --bad:#ef7b74; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:40px;line-height:1.05} h2{font-size:27px;line-height:1.1} h3{font-size:19px}
+p{margin:0;max-width:68ch} a{color:var(--accent)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.lede{color:var(--ink2);font-size:16px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.small{font-size:13px;color:var(--ink2)} .tiny{font-size:12px;color:var(--ink3)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile b{font-family:var(--f-display);font-weight:600;font-size:38px;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile b span{font-size:20px;color:var(--ink2);margin-left:4px}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.two>*{min-width:0}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:500;white-space:nowrap}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tfoot td{font-weight:600;border-bottom:0;border-top:2px solid var(--line2)}
+dl.spec{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:14px}
+dl.spec dt{color:var(--ink3);font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+dl.spec dd{margin:0}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 22px}
+.sl{display:grid;grid-template-columns:1fr 26px;gap:2px 8px;align-items:center}
+.sl label{font-size:13px;color:var(--ink2);grid-column:1/3}
+.sl output{font-family:var(--f-mono);font-size:13px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0;height:22px}
+.rows{display:flex;flex-direction:column;gap:6px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:stretch}
+.view{display:flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;border:1px solid var(--line);border-radius:5px;font-family:var(--f-mono);font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap}
+.view:hover{border-color:var(--accent);background:var(--accent-soft)}
+.kitem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;min-width:0}
+.alts{display:flex;flex-wrap:wrap;gap:6px}
+.alts button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+#copyOut{width:100%;min-height:140px;font-family:var(--f-mono);font-size:12px;background:var(--sunk);color:var(--ink);border:1px solid var(--line2);border-radius:5px;padding:8px}
+.row{display:grid;grid-template-columns:26px minmax(0,1fr) 44px;gap:4px 10px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:5px;padding:9px 11px;cursor:pointer}
+.row:hover{border-color:var(--line2)} .row:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row[aria-checked=true]{border-color:var(--accent);background:var(--accent-soft)}
+.row .rk{font-family:var(--f-mono);color:var(--ink3);font-size:13px}
+.row .nm{font-weight:500;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.row .sc{font-family:var(--f-mono);font-size:13px;text-align:right}
+.row .sp{grid-column:2/4;font-family:var(--f-mono);font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.row .nt{grid-column:2/4;font-size:12.5px;color:var(--ink2)}
+.bar{grid-column:2/4;height:7px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ctx);border-radius:3px}
+.row[aria-checked=true] .bar i{background:var(--accent)}
+.chip{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;border:1px solid var(--line2);color:var(--ink2);white-space:nowrap}
+.chip.in{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.chip.warn{border-color:var(--warn);color:var(--warn)}
+.grp{font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-top:6px}
+.call{border-left:3px solid var(--accent);padding:2px 0 2px 12px;color:var(--ink2);font-size:14px}
+.call.w{border-color:var(--warn)}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:var(--f-mono);font-size:11px;fill:var(--ink2)}
+.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}
+.kit label{display:grid;grid-template-columns:20px 1fr;gap:2px 8px;border:1px solid var(--line);border-radius:5px;padding:9px 11px;cursor:pointer;min-width:0}
+.kit input{accent-color:var(--accent);margin-top:3px}
+.kit .sp{grid-column:2;font-family:var(--f-mono);font-size:12px;color:var(--ink2)}
+.kit .nt{grid-column:2;font-size:12.5px;color:var(--ink2)}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:13px;color:var(--ink2)}
+select,button.btn{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line2);border-radius:5px;padding:5px 9px}
+button.btn{cursor:pointer}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;border:1px solid var(--line2);vertical-align:-1px;margin-right:5px}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:70ch}
+details summary{cursor:pointer;font-weight:500}
+details ul{font-size:13px;columns:2 320px;padding-left:18px}
+.readout{font-family:var(--f-mono);font-size:12.5px;color:var(--ink2);min-height:19px}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .15s}}
+</style>
+</head><body>
+
+<div class="wrap">
+<header style="display:flex;flex-direction:column;gap:8px">
+  <span class="eyebrow">Christensen Arms Ridgeline FFT · .308 Win · 16 in carbon</span>
+  <h1>Ridgeline FFT build</h1>
+  <p class="lede">Every piece that goes on or with the rifle, scored against your priorities. Move a slider and the ranking changes. Click any row to put it in the build, and the weight, cost and range numbers update.</p>
+</header>
+
+<div class="tiles" id="tiles"></div>
+
+<section>
+  <h2>Build sheet</h2>
+  <div class="panel">
+    <div class="scroll"><table id="sheet"></table></div>
+    <div class="ctl"><button class="btn" id="copy" type="button">Copy my build as text</button><button class="btn" id="reset" type="button">Reset to top-scoring picks</button><span class="tiny" id="copyMsg" role="status"></span></div>
+    <textarea id="copyOut" hidden readonly aria-label="Build as text"></textarea>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label class="small" for="codeIn">Got a build code from someone? Paste it here to load their exact picks and sliders.</label>
+      <div class="ctl"><input id="codeIn" type="text" placeholder="b.eyJwIjpb..." style="flex:1;min-width:0;font:inherit;font-family:var(--f-mono);font-size:12px;padding:6px 8px;border:1px solid var(--line2);border-radius:5px;background:var(--surface);color:var(--ink)"><button class="btn" id="codeLoad" type="button">Load build</button><button class="btn" id="codeCopy" type="button">Copy my build code</button></div>
+      <span class="tiny" id="codeMsg" role="status"></span>
+    </div>
+    <div class="ctl"><span class="tiny">Rifle weight is Christensen's 5.4 lb starting figure. The factory brake comes off for the can and its weight is not published, so it is not subtracted. Your picks are saved in this browser only; anyone you share the page with starts from the top-scoring picks.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Your rifle</h2>
+  <div class="panel">
+    <div class="two">
+      <dl class="spec" id="rifleSpec"></dl>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <svg id="look" viewBox="0 0 760 190" role="img" aria-label="Side profile of the rifle to scale with the selected scope, mount, suppressor and bipod"></svg>
+        <div class="ctl">
+          <label>Metal finish <select id="metal"><option value="#6e5a45">Burnt bronze Cerakote</option><option value="#9a9c9b">Natural stainless</option><option value="#222426">Black</option></select></label>
+          <label>Suppressor cover <select id="cover"><option value="">None</option><option value="#1d1e1f">Black</option><option value="#8a7453">Coyote</option><option value="#5a6247">Ranger green</option></select></label>
+        </div>
+        <p class="tiny">Drawn to scale at the selected can length and scope objective. Set the metal finish to match your rifle; Christensen pairs the green, black and tan stock with burnt bronze on most runs.</p>
+      </div>
+    </div>
+    <div>
+      <h3>Making it look like one rifle</h3>
+      <ul class="plain small" style="margin-top:8px">
+        <li><b>Keep the hardware black.</b> Every scope, ring set and can here ships in black or near-black, which sits cleanly against a green and tan stock and a dark carbon barrel.</li>
+        <li><b>Use the suppressor cover as the color accent.</b> Coyote or ranger green picks up the stock. It also cuts mirage and keeps a hot titanium can off your pack and hands.</li>
+        <li><b>Pick one tan and stay in it.</b> Burnt bronze, FDE and coyote are three different colors and rarely match side by side. A coyote cover and sling next to a bronze action looks deliberate; an FDE can next to it usually does not.</li>
+        <li><b>The odd ones out:</b> the Nomad Ti XC ships in sniper grey and the Scythe-Ti in a dark oil-rubbed anodize. Both look fine under a cover and mismatched without one.</li>
+        <li><b>Avoid silver.</b> Bright stainless ring screws, a bare level or a silver bipod will be the first thing the eye lands on.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div id="cats" style="display:flex;flex-direction:column;gap:28px"></div>
+
+<section>
+  <h2>What the build can do</h2>
+  <p class="small">Trajectory for the load in the build, computed with a G1 point-mass model from the box velocity less the short-barrel loss. Treat it as a planning number until you chronograph your own rifle with the can on.</p>
+  <div class="panel">
+    <div class="sliders" id="envSl"></div>
+    <div class="two">
+      <div><h3>Energy, ft-lb</h3><svg id="chE" viewBox="0 0 460 260" role="img" aria-label="Energy by range for each load"></svg><div class="readout" id="roE"></div></div>
+      <div><h3>Velocity, fps</h3><svg id="chV" viewBox="0 0 460 260" role="img" aria-label="Velocity by range for each load"></svg><div class="readout" id="roV"></div></div>
+    </div>
+    <div class="ctl tiny"><span><span class="sw" style="background:var(--data)"></span>Load in the build</span><span><span class="sw" style="background:var(--ctx)"></span>Other loads</span><span>Dashed lines: your elk energy floor, the 1,000 ft-lb deer floor, and the assumed expansion floor for the load in the build</span></div>
+    <div class="scroll"><table id="dope"></table></div>
+    <p class="tiny">200 yd zero, 1.8 in sight height, 10 mph full-value wind. Come-ups are from the 200 yd zero.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Everything else</h2>
+  <p class="small">The small items that finish the build. Tick what you want and it is added to the right total: on the rifle, in the pack, or at the bench.</p>
+  <div class="panel"><div class="kit" id="kit"></div>
+  <p class="call">Tax stamp is $0 as of January 1, 2026. The Form 4 still applies; ATF reported 6 days average for individuals and 20 for trusts on eForms finalized in August 2026.</p></div>
+</section>
+
+<section>
+  <h2>How to read the numbers</h2>
+  <ul class="plain small">
+    <li>Weights, prices and PEW ratings are published figures gathered October 7, 2026. A tilde marks an estimate I could not verify.</li>
+    <li>Criteria marked <span class="chip">my rating</span> are my 1 to 10 judgment, because no published number exists for glass quality, toughness or stability. Change the slider to 0 to remove one from the score.</li>
+    <li>Scores are relative within each list: 100 means best in the list on every criterion you weighted.</li>
+    <li>PEW Science tested every can on a 20 in .308. Your 16 in barrel will be louder with all of them; the order should hold.</li>
+    <li>No ammunition maker publishes a minimum expansion velocity for these loads. The floors used here are commonly relayed figures and are labeled as assumed.</li>
+  </ul>
+  <details><summary>Sources</summary><ul id="src"></ul></details>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), f0=n=>Math.round(n).toLocaleString('en-US'), f1=n=>(+n).toFixed(1);
+const usd=(o)=>(o.est?'~':'')+'$'+f0(o.usd);
+const BLK='#1c1d1f';
+
+const RIFLE=[['Model','Christensen Arms Ridgeline FFT'],['Cartridge','.308 Winchester'],['Action','Short action, standard Remington 700 footprint'],
+['Barrel','16 in carbon-fiber wrapped, 1:10 twist'],['Muzzle','5/8x24 thread, removable stainless side-baffle brake'],['Stock','FFT carbon, green with black and tan'],
+['Weight','5.4 lb bare (Christensen starting weight)'],['Length','About 36.5 in. Retailers list 40.5 in, which matches the 20 in barrel'],['Magazine','Internal, hinged aluminum floorplate, 4 rounds'],
+['Scope bases','6-48 screws per Christensen’s Ridgeline base listing. Confirm on yours before ordering. No rail included'],['Sling and bipod','Two sling studs, no Picatinny section on the stock'],['MSRP','$2,049.99']];
+
+const CATS=[
+{id:'scope',title:'Scope',blurb:'The 16 in barrel caps this rifle near 400 yd on elk, so 15 to 18x on top is plenty. Weight and low-light glass matter most.',
+ crit:[{k:'oz',l:'Light weight',d:-1,w:9},{k:'glass',l:'Low-light glass',d:1,w:8,mine:1},{k:'tough',l:'Holds zero when knocked',d:1,w:5,mine:1},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>`${f1(o.oz)} oz · ${o.tube} tube · ${o.fp} · ${usd(o)}`,
+ opts:[
+ {n:'Swarovski Z5i+ 3.5-18x50 BT',oz:21,usd:2199,tube:'30 mm',fp:'SFP',obj:50,glass:10,tough:7,hex:BLK,nt:'91% light transmission, illuminated, ballistic turret. Sources list 19 to 21.4 oz; 21 is Swarovski’s figure.'},
+ {n:'Swarovski Z5i 3.5-18x44 BT',oz:17.4,usd:1829,tube:'1 in',fp:'SFP',obj:44,glass:9.5,tough:6.5,hex:BLK,flag:'Discontinued',nt:'The lightest here, but marked discontinued; a few retailers still list stock. Needs 1 in rings.'},
+ {n:'Leupold VX-6HD Gen 2 3-18x44',oz:22.1,usd:1900,tube:'30 mm',fp:'SFP',obj:44,glass:8.5,tough:7.5,hex:BLK,nt:'CDS-SZL2 dial cut to your load, 85 MOA elevation, FireDot, lifetime guarantee.'},
+ {n:'Leupold VX-5HD Gen 2 3-15x44',oz:19.9,usd:1500,tube:'30 mm',fp:'SFP',obj:44,glass:7.5,tough:7.5,hex:BLK,nt:'Same dial system as the VX-6HD in a lighter body. FireDot version is 20.1 oz.'},
+ {n:'Vortex Razor HD LHT 3-15x42',oz:19.1,usd:1300,tube:'30 mm',fp:'SFP',obj:42,glass:8,tough:7.5,hex:'#2a2b2d',nt:'Locking RevStop turret, illuminated center dot, unlimited lifetime warranty.'},
+ {n:'Zeiss Conquest V4 4-16x44',oz:22.6,usd:1275,tube:'30 mm',fp:'SFP',obj:44,glass:8,tough:7.5,hex:BLK,nt:'90% light transmission, external elevation turret with ballistic stop. 4x low end is tight in timber.'},
+ {n:'Maven RS1.2 2.5-15x44',oz:26.4,usd:1400,tube:'30 mm',fp:'FFP',obj:44,glass:8,tough:8.5,hex:'#26282a',nt:'First focal plane, 100 MOA travel, sold direct. Accent colors can be ordered custom.'},
+ {n:'Nightforce NX8 2.5-20x50 F2',oz:28.3,usd:2200,tube:'30 mm',fp:'SFP',obj:50,glass:7.5,tough:10,hex:BLK,nt:'The one to pick if the rifle gets abused. Weight is from the F1 listing.'}]},
+{id:'mount',title:'Rings and bases',blurb:'Match the ring diameter to the scope tube. A one-piece ring and base is lightest; a rail costs about 2 oz and lets you move the scope or add a clip-on mount later.',
+ crit:[{k:'oz',l:'Light weight',d:-1,w:9},{k:'flex',l:'Scope position flexibility',d:1,w:4,mine:1},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>`${f1(o.oz)} oz · ${o.rail} · ${usd(o)}`,
+ opts:[
+ {n:'Talley Lightweight Alloy',oz:4.0,usd:43,rail:'no rail needed',flex:4,hex:BLK,nt:'Ring and base machined as one piece, so there is no joint to shoot loose. Weight is the 30 mm medium set.'},
+ {n:'Warne Mountain Tech + rail',oz:6.0,usd:219,rail:'on Christensen rail',flex:8,hex:BLK,nt:'3.9 oz rings plus the 2.1 oz Christensen 6-48 rail.'},
+ {n:'Seekins Precision + rail',oz:6.2,usd:209,rail:'on Christensen rail',flex:8,hex:BLK,nt:'4.1 oz rings plus the 2.1 oz rail.'},
+ {n:'Unknown Munitions Premier + rail',oz:6.6,usd:255,rail:'on Christensen rail',flex:9,hex:BLK,nt:'4.5 oz rings plus the 2.1 oz rail. 30, 34 and 35 mm only.'}],
+ foot:'Hawkins Hybrid and Nightforce Ultralite rings belong on this list, but I could not verify their current weights, so they are left out of the scoring.'},
+{id:'can',title:'Suppressor',blurb:'Chris’s method: weight sound, weight and length, then see what rises. Sound is the PEW Science composite on a 20 in .308 bolt gun.',
+ crit:[{k:'pew',l:'Quiet (PEW rating)',d:1,w:7},{k:'oz',l:'Light weight',d:-1,w:9},{k:'len',l:'Short',d:-1,w:4},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>`${o.pew?'PEW '+f1(o.pew):'no PEW test'} · ${f1(o.oz)} oz · ${o.len} in · ${usd(o)}`,
+ opts:[
+ {n:'Diligent Defense Enticer L-Ti',pew:51.9,oz:10.5,len:8.25,usd:865,hex:BLK,lp:'t',nt:'Highest at-ear rating PEW had measured on this platform when tested. Rated to 14.5 in barrels. Direct-thread mount included.'},
+ {n:'Diligent Defense Enticer S-Ti',pew:42.5,oz:9.3,len:6.75,usd:800,est:1,hex:BLK,lp:'r',nt:'The short version. Rated to 14.5 in barrels. Price is my estimate.'},
+ {n:'CAT JL Titanium',pew:53.8,oz:13.2,len:8.2,usd:1240,hex:BLK,lp:'tl',nt:'Chris’s pick. 16 in is its minimum barrel, so yours sits at the floor. One owner reported his weighing well over spec.'},
+ {n:'PTR Vent 1',pew:57.3,oz:15.4,len:9.1,usd:1299,hex:BLK,lp:'l',nt:'The quietest can PEW lists on this platform. Weight is with the direct-thread mount.'},
+ {n:'Liberty Mach-L',pew:53.5,oz:13.2,len:9.28,usd:1149,hex:BLK,lp:'b',nt:'Welded titanium. Price is from a listing that mixes two models, so confirm it.'},
+ {n:'Otter Creek Hydrogen-L',pew:49.8,oz:13.8,len:9.4,usd:950,hex:BLK,lp:'r',nt:'Weight and length with the direct-thread mount.'},
+ {n:'Thunder Beast Ultra 9',pew:46.1,oz:11.8,len:9.0,usd:1290,est:1,hex:BLK,lp:'r',nt:'PEW tested the first generation; the current Gen 2 is lighter and reported quieter. Price is the brake-mount version.'},
+ {n:'SilencerCo Scythe-Ti',oz:7.3,len:6.16,usd:1174,hex:'#3b3632',unscored:1,nt:'The lightest and shortest here. No PEW .308 test, so it cannot be scored on sound.'},
+ {n:'Thunder Beast Ultra 7 Gen 2',oz:9.8,len:7.0,usd:1180,est:1,hex:BLK,unscored:1,nt:'My first-round pick. Direct-thread weight is 9.8 oz, not the 8 oz I quoted. No PEW .308 test.'},
+ {n:'Dead Air Nomad Ti XC',oz:9.6,len:6.74,usd:999,hex:'#6b6d6f',unscored:1,nt:'Ships in sniper grey. PEW tested only the older Nomad-Ti, at 41.5.'},
+ {n:'Otter Creek Hydrogen-S',oz:9.3,len:7.0,usd:850,hex:BLK,unscored:1,nt:'Rated to 14.5 in barrels. No PEW .308 test.'}]},
+{id:'ammo',title:'Ammunition',blurb:'From 16 in, bullet choice sets your range more than anything else you can buy. Reach and wind numbers are computed for your barrel and the altitude set below.',
+ crit:[{k:'elk',l:'Reach on elk',d:1,w:8},{k:'tough',l:'Holds together on elk',d:1,w:7,mine:1},{k:'drift',l:'Low wind drift at 400 yd',d:-1,w:4},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>`${o.gr} gr · G1 ${o.bc} · ${f0(o.mv16)} fps at 16 in · elk to ${o.elk>=700?'700+':o.elk} yd · ${usd(o)}/20`,
+ opts:[
+ {n:'Hornady Precision Hunter ELD-X',gr:178,bc:.552,mv:2600,floor:1600,tough:5,usd:47,nt:'Highest BC here and opens at low velocity. Softer than a bonded bullet on close, heavy-bone hits.'},
+ {n:'Federal Terminal Ascent',gr:175,bc:.520,mv:2600,floor:1400,tough:9,usd:67,nt:'Bonded with a copper shank. Federal says its tip starts expansion 200 fps lower than comparable designs.'},
+ {n:'Nosler Trophy Grade AccuBond',gr:165,bc:.475,mv:2800,floor:1800,tough:8,usd:79,nt:'Bonded. Fast at the muzzle, but the lower BC gives it up by 400 yd.'},
+ {n:'Federal Trophy Bonded Tip',gr:165,bc:.450,mv:2700,floor:1800,tough:9,usd:63,nt:'Bonded with a solid copper shank. Federal does not state the drag model for its BC.'},
+ {n:'Berger Classic Hunter 185',gr:185,bc:.533,mv:2532,floor:1800,tough:4,usd:47,nt:'Heavy and efficient, but slow from 16 in. Fragmenting hollow point.'},
+ {n:'Berger Classic Hunter 168',gr:168,bc:.489,mv:2675,floor:1800,tough:4,usd:47,nt:'Fragmenting hollow point. Better suited to deer than elk.'},
+ {n:'Hornady Outfitter CX',gr:165,bc:.434,mv:2610,floor:2000,tough:9,usd:48,nt:'Monolithic copper needs speed to open, and a 16 in barrel does not give it much. BC is from my recollection of Hornady’s listing.'},
+ {n:'Hornady Superformance SST',gr:165,bc:.447,mv:2840,floor:1700,tough:4,usd:39,nt:'Superformance powders usually lose more than average in short barrels, so this figure is optimistic.'}]},
+{id:'rf',title:'Rangefinder',blurb:'You need a binocular for mountain hunting anyway, so a rangefinding binocular is one purchase instead of two. A handheld only makes sense paired with a separate binocular, which adds roughly 20 to 30 oz and $1,000 or more.',
+ crit:[{k:'oz',l:'Light weight',d:-1,w:3},{k:'glass',l:'Glass for glassing',d:1,w:9,mine:1},{k:'solver',l:'Ballistic solver',d:1,w:7,mine:1},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>`${o.kind} · ${f1(o.oz)} oz · ${f0(o.yd)} yd reflective · ${usd(o)}`,
+ opts:[
+ {n:'Leica Geovid Pro 10x32',kind:'binocular',oz:28.9,yd:2500,glass:8.5,solver:9,usd:3399,nt:'Applied Ballistics Ultralight onboard, good to 875 yd, which covers this rifle. Lightest of the binoculars.'},
+ {n:'Leica Geovid Pro 10x42 AB+',kind:'binocular',oz:34.2,yd:3200,glass:9.5,solver:10,usd:3999,nt:'Applied Ballistics Elite onboard. Weight is the non-AB+ 10x42 figure.'},
+ {n:'Swarovski EL Range 10x42 TA',kind:'binocular',oz:32.6,yd:2200,glass:10,solver:7,usd:3699,nt:'Best glass. Swarovski’s own solver shows corrected range or clicks from three app profiles.'},
+ {n:'Zeiss Victory RF 10x42',kind:'binocular',oz:33.9,yd:2500,glass:9.5,solver:7,usd:4000,nt:'Zeiss solver through the Hunting App.'},
+ {n:'Sig Kilo10K-ABS HD Gen II',kind:'binocular',oz:32,yd:10000,glass:7.5,solver:10,usd:2700,nt:'Applied Ballistics Elite onboard with wind entry. Glass is a step below the European three.'},
+ {n:'Vortex Fury HD 5000 AB',kind:'binocular',oz:32.4,yd:5000,glass:6.5,solver:9,usd:1500,flag:'Availability unclear',nt:'One major retailer shows it no longer available.'},
+ {n:'Leica Rangemaster CRF Pro',kind:'handheld',oz:6.5,yd:2800,glass:4,solver:9,usd:999,nt:'Applied Ballistics Ultralight onboard in a 6.5 oz body. You would still need a binocular.'},
+ {n:'Sig Kilo8K-ABS Gen II',kind:'handheld',oz:7.5,yd:8000,glass:4,solver:10,usd:1500,nt:'Applied Ballistics Elite onboard. You would still need a binocular.'},
+ {n:'Vortex Razor HD 4000 GB',kind:'handheld',oz:10.1,yd:4000,glass:4,solver:8,usd:800,nt:'GeoBallistics onboard. You would still need a binocular.'}]},
+{id:'bipod',title:'Bipod',blurb:'The stock has sling studs and no rail, so anything Picatinny needs an adapter. On a mountain rifle the question is whether the bipod lives on the gun or in a pocket.',
+ crit:[{k:'oz',l:'Light weight',d:-1,w:9},{k:'stab',l:'Stability',d:1,w:5,mine:1},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>`${f1(o.oz)} oz · ${o.att} · ${usd(o)}`,
+ opts:[
+ {n:'Tricer UL',oz:4.8,usd:299,att:'Picatinny, stud adapter included',stab:6,nt:'One retailer says Tricer’s stud adapter does not fit the Ridgeline. Confirm with Tricer before ordering.'},
+ {n:'Spartan Javelin Lite',oz:5.3,usd:100,att:'magnetic socket',stab:6,nt:'Snaps on and off a small socket that replaces the front stud. The rifle adapter is sold separately.'},
+ {n:'Spartan Javelin Pro Hunt Tac',oz:7.6,usd:330,est:1,att:'magnetic socket',stab:7.5,nt:'Adjustable legs and cant on the same socket. Price is my estimate.'},
+ {n:'Magpul Bipod',oz:11,usd:110,est:1,att:'sling stud',stab:7,nt:'Price is from a dated review.'},
+ {n:'Harris S-BRM 6-9 in',oz:13,usd:161,att:'sling stud',stab:8,nt:'Bolts straight to the factory stud. The standard for a reason, at a weight cost.'},
+ {n:'Atlas BT65 CAL Gen 2',oz:14.6,usd:330,att:'Picatinny lever',stab:10,nt:'Most stable here. Needs a rail section added to the forend.'},
+ {n:'No bipod, shoot off the pack',oz:0,usd:0,att:'none',unscored:1,nt:'Free and weightless. Costs you steadiness past 300 yd.'}]},
+{id:'thermal',title:'Thermal clip-on',blurb:'Only worth carrying for pigs. A clip-on sits in front of the day scope, so the zero stays put. Run the scope at low power; Pulsar recommends 2 to 6x.',
+ crit:[{k:'oz',l:'Light weight',d:-1,w:6},{k:'px',l:'Sensor resolution',d:1,w:7},{k:'hr',l:'Battery life',d:1,w:3},{k:'usd',l:'Low price',d:-1,w:1}],
+ spec:o=>o.px?`${o.res} · ${f1(o.oz)} oz · ${o.hr} h · ${usd(o)}`:'0 oz · $0',
+ opts:[
+ {n:'None for now',oz:0,usd:0,unscored:1,nt:'Nothing else in the build depends on this. Add it when the pig hunting happens.'},
+ {n:'Pulsar Krypton 2 FXG50',oz:16.2,usd:4500,res:'640x480',px:307,hr:11,nt:'Doubles as a handheld with the separate 3x monocular. Adapter takes 45.5 to 50 mm objective bells.'},
+ {n:'Steiner Nighthunter C35 Gen II',oz:16.2,usd:3000,est:1,res:'640x512',px:328,hr:9,nt:'Street price ranges from about $2,460 to $3,000.'},
+ {n:'Leica Calonox 2 Sight',oz:21.2,usd:3989,res:'640x480',px:307,hr:6.75,nt:'Sources disagree on battery life, 6.75 h or 11 h. Needs a clamp adapter sized to the scope.'},
+ {n:'Swarovski tM 35',oz:18,usd:5554,res:'320x256',px:82,hr:7,nt:'My earlier suggestion. It is a 320 sensor, half the resolution of the others at a higher price. Doubles as a handheld.'}]}
+];
+const PACK=new Set(['rf','thermal']);
+
+const KIT=[
+{id:'sling',n:'Magpul RLS sling',oz:4.4,usd:33,at:'rifle',on:1,nt:'Fits standard sling swivels.'},
+{id:'cover',n:'Cole-TAC HTP suppressor cover',oz:5.4,usd:98,at:'rifle',on:1,nt:'Kills mirage and carries the color. Sized for cans 5 to 7.5 in; longer cans need a different cover.'},
+{id:'level',n:'Vortex Lo Pro bubble level',oz:1,usd:50,at:'rifle',on:1,est:1,nt:'Cant shows up as a miss past 300 yd. Weight is my estimate.'},
+{id:'caps',n:'Scope cover or flip caps',oz:1.5,usd:30,at:'rifle',on:1,est:1,nt:'Weight and price are estimates.'},
+{id:'rounds',n:'Five rounds in the rifle',oz:0,usd:0,at:'rifle',on:1,calc:1,nt:'Four in the magazine and one chambered, at the weight of the load in the build.'},
+{id:'chrono',n:'Garmin Xero C1 Pro chronograph',oz:3.5,usd:600,at:'bench',on:1,nt:'The single most useful purchase here. Every range number on this page depends on your real velocity.'},
+{id:'torque',n:'Fix It Sticks torque driver kit',oz:12.6,usd:132,at:'bench',on:1,nt:'15 to 65 in-lb. Ring and base screws at spec is what keeps a zero.'},
+{id:'dev',n:'Five boxes to zero and true the data',oz:0,usd:0,at:'bench',on:1,calc:2,nt:'100 rounds of the load in the build.'},
+{id:'bag',n:'Armageddon Gear Schmedium rear bag',oz:16,usd:157,at:'pack',on:0,est:1,nt:'Git-Lite fill. Weight is my estimate; none is published.'},
+{id:'tripod',n:'Tricer AD tripod, LP head and gun clamp',oz:37,usd:733,at:'pack',on:0,nt:'Steadier than any bipod for sitting and standing shots. Clamp weight is not published and not included.'}];
+
+const SRC=[['Christensen Arms Ridgeline FFT','https://christensenarms.com/product/ridgeline-fft/'],['Christensen one-piece scope base','https://christensenarms.com/product/one-piece-scope-base-std-remington-700-action'],
+['PEW Science rankings','https://pewscience.com/rankings'],['PEW: Enticer L-Ti','https://pewscience.com/sound-signature-reviews-free/sss-6-67-ddc-enticer-l-savage-308'],['PEW: Enticer S-Ti','https://pewscience.com/sound-signature-reviews-free/sss-6-68-ddc-enticer-s-savage-308'],
+['PEW: CAT JL','https://pewscience.com/sound-signature-reviews-free/sss-6-147-cat-jl-savage-308'],['PEW: PTR Vent 1','https://pewscience.com/sound-signature-reviews-free/sss-6-160-ptr-vent-1-savage-308'],['PEW: Liberty Mach-L','https://pewscience.com/sound-signature-reviews-free/sss-6-163-liberty-precision-machine-mach-l-savage-308'],
+['PEW: Hydrogen-L','https://pewscience.com/sound-signature-reviews-free/sss-6-81-ocl-hydrogen-l-savage-308'],['PEW: Ultra 9','https://pewscience.com/sound-signature-reviews-free/sss-6-24-tbac-ultra-9-savage-308'],
+['Diligent Defense Enticer L-Ti','https://diligentdefense.com/product/enticer-l-ti/'],['Thunder Beast Ultra 7','https://thunderbeastarms.com/products/ultra-7'],['SilencerCo Scythe-Ti','https://silencerco.com/silencers/scythe-ti/'],
+['Silencer Shop: CAT JL Titanium','https://silencershop.com/cat-suppressors-jl-titanium.html'],['Silencer Shop: PTR Vent 1','https://www.silencershop.com/ptr-vent-1.html'],['ATF processing times','https://www.atf.gov/resource-center/current-processing-times'],['Tax stamp change','https://www.fastbound.com/nfa-tax-stamp/'],
+['Swarovski Z5i+ 3.5-18x50','https://www.swarovskioptik.com/ca/en/hunting/products/rifle-scopes/z5-i-plus/z5i-plus/z5i-plus-3p5-18x50-bt'],['EuroOptic: Swarovski Z5i+','https://www.eurooptic.com/swarovski-z5-plus-i-riflescopes?page=1'],
+['GoHunt: Leupold VX-6HD Gen 2','https://shop.gohunt.com/products/leupold-vx-6hd-gen-2-3-18x44-30mm-cds-szl2-side-focus-illum-firedot-duplex-184423'],['Zeiss Conquest V4 4-16x44','https://www.zeiss.com/consumer-products/us/hunting/riflescopes/conquest-v4/conquest-v4-4-16x44.html'],
+['Maven RS1.2','https://mavenbuilt.com/products/rs1-2-2-5-15x44-ffp'],['Warne Mountain Tech','https://warnescopemounts.com/7214m-warne-mountain-tech-30mm-medium-matte-rings/'],['EuroOptic: Talley one-piece','https://www.eurooptic.com/talley-one-piece-aluminum-ring-set-30mm-remington-700-721-722-725-40x-howa-1500-medium'],
+['Hornady 178 gr ELD-X','https://www.hornady.com/ammunition/rifle/308-win-178-gr-eld-x-precision-hunter'],['Federal Terminal Ascent','https://www.federalpremium.com/rifle/premium-centerfire-rifle/terminal-ascent/11-P308TA1.html'],['Federal Trophy Bonded Tip','https://www.federalpremium.com/rifle/premium-centerfire-rifle/trophy-bonded-tip/11-P308TT2.html'],
+['Rifleshooter barrel-length test','https://bulletin.accurateshooter.com/?p=66233'],['Rokslide: expansion velocities','https://rokslide.com/forums/threads/bullet-minumum-velocity-for-expansion.455744/'],
+['Leica Geovid Pro','https://leicacamerausa.com/leica-geovid-pro-10x42-ab.html'],['Sig Kilo10K Gen II','https://www.sigsauer.com/kilo10k-abs-hd-gen-ii.html'],['Scheels: Swarovski EL Range','https://www.scheels.com/p/swarovski-el-range-10x42-ta-rangefinding-binoculars/1139-72010.html'],
+['Pulsar Krypton 2','https://pulsarvision.com/manuals/krypton-2/fxg50'],['EuroOptic: Swarovski tM 35','https://www.eurooptic.com/swarovski-tm-35-320x256-12um-35mm-thermal-imaging-clip-on-device-72020'],['B&H: Leica Calonox 2 Sight','https://www.bhphotovideo.com/c/product/1803181-REG/leica_50511_calonox_2_sight.html'],
+['Spartan Javelin Lite','https://javelinbipod.com/products/javelin-lite'],['GoHunt: Tricer UL','https://shop.gohunt.com/products/tricer-ul-bipod'],['GoHunt: Harris S-BRM','https://shop.gohunt.com/collections/gear/products/harris-s-brm-6-to-9-inch-bipod'],
+['Magpul RLS','https://magpul.com/rls-sling.html'],['Primary Arms: Cole-TAC HTP','https://www.primaryarms.com/cole-tac-htp-suppressor-cover-1-5'],['Tricer AD tripod','https://tricer.com/products/tricer-ad']];
+
+/* ---------- ballistics: G1 point-mass ---------- */
+const G1=[[0,.2629],[.05,.2558],[.1,.2487],[.15,.2413],[.2,.2344],[.25,.2278],[.3,.2214],[.35,.2155],[.4,.2104],[.45,.2061],[.5,.2032],[.55,.202],[.6,.2034],[.7,.2165],[.725,.223],[.75,.2313],[.775,.2417],[.8,.2546],[.825,.2706],[.85,.2901],[.875,.3136],[.9,.3415],[.925,.3734],[.95,.4084],[.975,.4448],[1,.4805],[1.025,.5136],[1.05,.5427],[1.075,.5677],[1.1,.5883],[1.125,.6053],[1.15,.6191],[1.2,.6393],[1.25,.6518],[1.3,.6589],[1.35,.6621],[1.4,.6625],[1.45,.6607],[1.5,.6573],[1.55,.6528],[1.6,.6474],[1.65,.6413],[1.7,.6347],[1.75,.628],[1.8,.621],[1.85,.6141],[1.9,.6072],[1.95,.6003],[2,.5934],[2.05,.5867],[2.1,.5804],[2.15,.5743],[2.2,.5685],[2.25,.563],[2.3,.5577],[2.35,.5527],[2.4,.5481],[2.45,.5438],[2.5,.5397],[2.6,.5325],[2.7,.5264],[2.8,.5211],[2.9,.5168],[3,.5133]];
+function cd(m){ if(m>=3)return .5133; for(let i=1;i<G1.length;i++) if(m<=G1[i][0]){const a=G1[i-1],b=G1[i];return a[1]+(b[1]-a[1])*(m-a[0])/(b[0]-a[0]);} return .5133; }
+function traj(mvFps,bc,gr,altFt){
+  const rho=1.225*Math.pow(1-6.8756e-6*altFt,4.2559), T=288.15-0.0019812*altFt, sos=Math.sqrt(1.4*287.05*T);
+  const k=Math.PI/8*rho/(bc*703.07), dt=.0004, YD=.9144; let x=0,y=0,vx=mvFps*.3048,vy=0,t=0,next=0; const v0=vx, out=[];
+  while(next<=700){
+    if(x>=next*YD){const v=Math.hypot(vx,vy),fps=v/.3048; out.push({r:next,v:fps,e:gr*fps*fps/450437,y:y/.0254,drift:17.6*10*(t-x/v0)/1*1}); next+=10;}
+    const v=Math.hypot(vx,vy), a=k*cd(v/sos)*v; vx-=a*vx*dt; vy-=(a*vy+9.80665)*dt; x+=vx*dt; y+=vy*dt; t+=dt; if(t>4)break;
+  }
+  const z=out[20], sh=1.8; out.forEach(p=>{p.path=p.y+(sh-z.y)*(p.r/200)-sh; p.moa=p.r?-p.path/(p.r/100*1.047):0;});
+  return out;
+}
+
+/* ---------- state ---------- */
+const DEF={w:{},pick:{},kit:{},env:{alt:0,loss:25,elk:1500},metal:'#6e5a45',cover:''};
+CATS.forEach(c=>{DEF.w[c.id]={};c.crit.forEach(k=>DEF.w[c.id][k.k]=k.w)}); KIT.forEach(k=>DEF.kit[k.id]=!!k.on);
+let S=JSON.parse(JSON.stringify(DEF));
+try{const s=JSON.parse(localStorage.getItem('fftBuild')||'null'); if(s&&s.w&&s.pick){Object.keys(DEF.w).forEach(c=>Object.assign(S.w[c],s.w[c]||{}));Object.assign(S.pick,s.pick);Object.assign(S.kit,s.kit||{});Object.assign(S.env,s.env||{});S.metal=s.metal||S.metal;S.cover=s.cover||'';}}catch(e){}
+const save=()=>{try{localStorage.setItem('fftBuild',JSON.stringify(S))}catch(e){}};
+const cat=id=>CATS.find(c=>c.id===id), picked=id=>{const c=cat(id);return c.opts.find(o=>o.n===S.pick[id])||c.opts[0]};
+
+function computeAmmo(){
+  cat('ammo').opts.forEach(o=>{
+    o.mv16=o.mv-S.env.loss*8; o.t=traj(o.mv16,o.bc,o.gr,S.env.alt);
+    const lim=(eMin)=>{let r=0;for(const p of o.t){if(p.e>=eMin&&p.v>=o.floor)r=p.r;else break;}return r;};
+    o.elk=lim(S.env.elk); o.deer=lim(1000); o.drift=o.t[40].drift;
+    const pe=o.t.find(p=>p.e<S.env.elk), pv=o.t.find(p=>p.v<o.floor); o.why=(!pv||(pe&&pe.r<=pv.r))?'energy':'expansion velocity';
+  });
+}
+function rank(c){
+  const sc=c.opts.filter(o=>!o.unscored);
+  const mm=c.crit.map(k=>{const v=sc.map(o=>o[k.k]);return [Math.min(...v),Math.max(...v)]});
+  sc.forEach(o=>{let t=0,ws=0;c.crit.forEach((k,i)=>{const w=S.w[c.id][k.k],[mn,mx]=mm[i];const n=mx===mn?1:(o[k.k]-mn)/(mx-mn);t+=w*(k.d<0?1-n:n);ws+=w});o._s=ws?t/ws:0});
+  return sc.slice().sort((a,b)=>b._s-a._s);
+}
+function ensurePicks(force){CATS.forEach(c=>{if(force||!c.opts.some(o=>o.n===S.pick[c.id])) S.pick[c.id]=c.id==='thermal'?c.opts[0].n:rank(c)[0].n;});}
+
+/* ---------- render ---------- */
+const URLS={
+'Swarovski Z5i+ 3.5-18x50 BT':'https://www.swarovskioptik.com/ca/en/hunting/products/rifle-scopes/z5-i-plus/z5i-plus/z5i-plus-3p5-18x50-bt',
+'Swarovski Z5i 3.5-18x44 BT':'https://www.kygunco.com/product/swarovski-69764-z5i-3.5-18x44-bt-4w-i-riflescope',
+'Leupold VX-6HD Gen 2 3-18x44':'https://shop.gohunt.com/products/leupold-vx-6hd-gen-2-3-18x44-30mm-cds-szl2-side-focus-illum-firedot-duplex-184423',
+'Leupold VX-5HD Gen 2 3-15x44':'https://outdoorsmans.com/products/vx-5hd-gen-2-3-15x44-30mm-cds-szl2-side-focus-illum-firedot-duplex',
+'Vortex Razor HD LHT 3-15x42':'https://store.themeateater.com/products/RZR-31501.html',
+'Zeiss Conquest V4 4-16x44':'https://www.zeiss.com/consumer-products/us/hunting/riflescopes/conquest-v4/conquest-v4-4-16x44.html',
+'Maven RS1.2 2.5-15x44':'https://mavenbuilt.com/products/rs1-2-2-5-15x44-ffp',
+'Nightforce NX8 2.5-20x50 F2':'https://www.opticsplanet.com/v/c639-nightforce-nx8-2-5-20x50mm-riflescope.html',
+'Talley Lightweight Alloy':'https://www.eurooptic.com/talley-one-piece-aluminum-ring-set-30mm-remington-700-721-722-725-40x-howa-1500-medium',
+'Warne Mountain Tech + rail':'https://warnescopemounts.com/7214m-warne-mountain-tech-30mm-medium-matte-rings/',
+'Seekins Precision + rail':'https://www.tractorsupply.com/tsc/product/seekins-precision-scope-rings-30mm-tube-medium-picatinny-rail-087-in-matte-black-aluminum',
+'Unknown Munitions Premier + rail':'https://sandsarchery.com/products/unknown-munitions-premier-scope-rings',
+'Diligent Defense Enticer L-Ti':'https://diligentdefense.com/product/enticer-l-ti/',
+'Diligent Defense Enticer S-Ti':'https://www.silencershop.com/diligent-defense-enticer-s-ti.html',
+'CAT JL Titanium':'https://silencershop.com/cat-suppressors-jl-titanium.html',
+'PTR Vent 1':'https://www.silencershop.com/ptr-vent-1.html',
+'Liberty Mach-L':'https://www.silencershop.com/liberty-precision-machine-mach-l.html',
+'Otter Creek Hydrogen-L':'https://silencershop.com/otter-creek-labs-hydrogen-l-762.html',
+'Thunder Beast Ultra 9':'https://thunderbeastarms.com/products/ultra-9',
+'SilencerCo Scythe-Ti':'https://silencerco.com/silencers/scythe-ti/',
+'Thunder Beast Ultra 7 Gen 2':'https://thunderbeastarms.com/products/ultra-7',
+'Dead Air Nomad Ti XC':'https://www.silencershop.com/dead-air-nomad-ti-xc-direct-thread-sniper-grey-cerakote.html',
+'Otter Creek Hydrogen-S':'https://www.silencershop.com/otter-creek-labs-hydrogen-s-7-62mm.html',
+'Hornady Precision Hunter ELD-X':'https://www.hornady.com/ammunition/rifle/308-win-178-gr-eld-x-precision-hunter',
+'Federal Terminal Ascent':'https://www.federalpremium.com/rifle/premium-centerfire-rifle/terminal-ascent/11-P308TA1.html',
+'Nosler Trophy Grade AccuBond':'https://www.tractorsupply.com/tsc/product/nosler-trophy-grade-308-win-165-grain-nosler-accubond-rifle-ammunition-20-rounds',
+'Federal Trophy Bonded Tip':'https://www.federalpremium.com/rifle/premium-centerfire-rifle/trophy-bonded-tip/11-P308TT2.html',
+'Berger Classic Hunter 185':'https://creedmoorsports.com/berger-ammunition-308-winchester-185-grain-classic-hunter',
+'Berger Classic Hunter 168':'https://www.creedmoorsports.com/product/berger-ammunition-308-winchester-168-grain-classic-hunter',
+'Hornady Outfitter CX':'https://blackstoneshooting.com/hornady-outfitter-308-win-165-gr-cx-20-rounds/',
+'Hornady Superformance SST':'https://www.hornady.com/ammunition/rifle/308-win-165-gr-sst-superformance',
+'Leica Geovid Pro 10x42 AB+':'https://leicacamerausa.com/leica-geovid-pro-10x42-ab.html',
+'Swarovski EL Range 10x42 TA':'https://www.scheels.com/p/swarovski-el-range-10x42-ta-rangefinding-binoculars/1139-72010.html',
+'Zeiss Victory RF 10x42':'https://www.zeiss.com/consumer-products/us/precision-shooting/observation-products/rangefinder/victory-rf/victory-rf-10x42.html',
+'Sig Kilo10K-ABS HD Gen II':'https://www.sigsauer.com/kilo10k-abs-hd-gen-ii.html',
+'Vortex Fury HD 5000 AB':'https://www.kygunco.com/product/vortex-lrf302-fury-hd-5000-ab-10x42',
+'Leica Rangemaster CRF Pro':'https://www.1shotgear.com/products/leica-rangemaster-crf-pro-40547',
+'Sig Kilo8K-ABS Gen II':'https://www.sigsauer.com/kilo8k-abs-gen-ii.html',
+'Vortex Razor HD 4000 GB':'https://www.scheels.com/p/vortex-razor-hd-4000-gb-ballistic-laser-rangefinder/84382911725.html',
+'Tricer UL':'https://shop.gohunt.com/products/tricer-ul-bipod',
+'Spartan Javelin Lite':'https://javelinbipod.com/products/javelin-lite',
+'Spartan Javelin Pro Hunt Tac':'https://javelinbipod.com/products/pro-hunt-tac-with-classic-rifle-adapter',
+'Harris S-BRM 6-9 in':'https://shop.gohunt.com/collections/gear/products/harris-s-brm-6-to-9-inch-bipod',
+'Atlas BT65 CAL Gen 2':'https://shop.gohunt.com/products/atlas-bipods-bt65-lw17-gen-2-cal-bipod',
+'Pulsar Krypton 2 FXG50':'https://shop.brownells.com/optics/night-vision-thermal/thermal-optics/krypton-2-xg50-3x-thermal-front-attachment-kit/',
+'Steiner Nighthunter C35 Gen II':'https://blackstoneshooting.com/steiner-nighthunter-c35-gen-ii-thermal-clip-on-35mm-black-840229106509',
+'Leica Calonox 2 Sight':'https://www.bhphotovideo.com/c/product/1803181-REG/leica_50511_calonox_2_sight.html',
+'Swarovski tM 35':'https://www.eurooptic.com/swarovski-tm-35-320x256-12um-35mm-thermal-imaging-clip-on-device-72020',
+'Magpul RLS sling':'https://magpul.com/rls-sling.html',
+'Cole-TAC HTP suppressor cover':'https://www.primaryarms.com/cole-tac-htp-suppressor-cover-1-5',
+'Vortex Lo Pro bubble level':'https://midwestgunworks.com/page/mgwi/prod/lbl',
+'Armageddon Gear Schmedium rear bag':'https://www.eurooptic.com/armageddon-gear-schmedium-mid-sized-game-changer-black-waxed-canvas-support-bag-ag0748-bk-glf',
+'Tricer AD tripod, LP head and gun clamp':'https://tricer.com/products/tricer-ad',
+'Ridgeline FFT .308, 16 in':'https://christensenarms.com/product/ridgeline-fft/'};
+const SEARCH={'Leica Geovid Pro 10x32':'Leica Geovid Pro 10x32 rangefinder binocular','Magpul Bipod':'Magpul bipod sling stud','Scope cover or flip caps':'scope flip caps 44mm objective',
+'Garmin Xero C1 Pro chronograph':'Garmin Xero C1 Pro chronograph','Fix It Sticks torque driver kit':'Fix It Sticks all-in-one torque driver kit','Five boxes to zero and true the data':'',
+'Five rounds in the rifle':'','No bipod, shoot off the pack':'','None for now':''};
+function linkFor(n){ if(URLS[n]) return {u:URLS[n],t:'View'}; const q=SEARCH[n]; if(q===''||q===undefined&&!n) return null;
+  if(q===undefined) return {u:'https://www.google.com/search?q='+encodeURIComponent(n),t:'Search'}; return {u:'https://www.google.com/search?q='+encodeURIComponent(q),t:'Search'}; }
+function linkHTML(n,cls){const l=linkFor(n); return l?`<a class="${cls||'view'}" href="${l.u}" target="_blank" rel="noopener" aria-label="${l.t} ${n.replace(/"/g,'&quot;')} online">${l.t} ↗</a>`:'<span></span>';}
+function rowHTML(c,o,i,top){
+  const on=S.pick[c.id]===o.n;
+  return `<div class="item"><button type="button" class="row" role="radio" aria-checked="${on}" data-c="${c.id}" data-n="${o.n.replace(/"/g,'&quot;')}">
+    <span class="rk">${i==null?'':i+1}</span><span class="nm">${o.n}${on?'<span class="chip in">In build</span>':''}${top?'<span class="chip">Top score</span>':''}${o.flag?`<span class="chip warn">${o.flag}</span>`:''}</span>
+    <span class="sc">${o.unscored?'':Math.round(o._s*100)}</span>
+    ${o.unscored?'':`<span class="bar"><i style="width:${Math.max(2,Math.round(o._s*100))}%"></i></span>`}
+    <span class="sp">${c.spec(o)}</span><span class="nt">${o.nt||''}</span></button>${linkHTML(o.n)}</div>`;
+}
+function renderCat(c){
+  const r=rank(c), un=c.opts.filter(o=>o.unscored);
+  let h=r.map((o,i)=>rowHTML(c,o,i,i===0)).join('');
+  if(un.length) h+=`<div class="grp">${c.id==='can'?'Not scored: no PEW .308 test':'Not scored'}</div>`+un.map(o=>rowHTML(c,o,null,false)).join('');
+  $('#rows-'+c.id).innerHTML=h;
+  if(c.id==='can') drawScatter();
+}
+function buildCats(){
+  $('#cats').innerHTML=CATS.map(c=>`<section id="${c.id}"><h2>${c.title}</h2><p class="small">${c.blurb}</p><div class="panel">
+    <div><div class="eyebrow" style="margin-bottom:8px">Your priorities, 0 to 10</div><div class="sliders">${c.crit.map(k=>`<div class="sl"><label for="w-${c.id}-${k.k}">${k.l}${k.mine?' <span class="chip">my rating</span>':''}</label><input type="range" min="0" max="10" step="1" id="w-${c.id}-${k.k}" data-c="${c.id}" data-k="${k.k}" value="${S.w[c.id][k.k]}"><output>${S.w[c.id][k.k]}</output></div>`).join('')}</div></div>
+    ${c.id==='can'?'<div><h3>Weight against sound</h3><svg id="scat" viewBox="0 0 460 250" role="img" aria-label="Suppressor weight against PEW Science suppression rating"></svg><p class="tiny">Up and to the left is better. The filled point is the can in the build.</p></div>':''}
+    <div class="rows" role="radiogroup" aria-label="${c.title} options" id="rows-${c.id}"></div>${c.foot?`<p class="tiny">${c.foot}</p>`:''}</div></section>`).join('');
+}
+function totals(){
+  const am=picked('ammo'), cart=(am.gr+215)/437.5; let rifle=86.4,pack=0,cost=0; const lines=[];
+  CATS.forEach(c=>{const o=picked(c.id); if(c.id==='ammo'){lines.push([c.title,o.n,null,null,c.id]);return;} (PACK.has(c.id)?(pack+=o.oz):(rifle+=o.oz)); cost+=o.usd; lines.push([c.title,o.n,o.oz,o.usd,c.id,PACK.has(c.id)?'pack':'rifle',o.est]);});
+  KIT.forEach(k=>{if(!S.kit[k.id])return; const oz=k.calc===1?cart*5:k.oz, u=k.calc===2?am.usd*5:k.usd; if(k.at==='rifle')rifle+=oz; else if(k.at==='pack')pack+=oz; cost+=u; lines.push(['Kit',k.n,oz,u,'kit',k.at,k.est]);});
+  return {rifle,pack,cost,lines,am};
+}
+function renderSummary(){
+  const t=totals(), am=t.am, can=picked('can'), y=v=>v>=700?'700+':v;
+  const span=alt=>{const tr=traj(am.mv16,am.bc,am.gr,alt);let e=0,d=0;for(const p of tr){if(p.e>=S.env.elk&&p.v>=am.floor)e=p.r;else break;}for(const p of tr){if(p.e>=1000&&p.v>=am.floor)d=p.r;else break;}return[e,d];};
+  const lo=span(0),hi=span(9000);
+  $('#tiles').innerHTML=`
+   <div class="tile"><span class="eyebrow">Rifle, ready to hunt</span><b>${(t.rifle/16).toFixed(2)}<span>lb</span></b><span class="small">About ${f1(36.5+can.len-0.6)} in long with the can</span></div>
+   <div class="tile"><span class="eyebrow">Build cost</span><b>$${f0(t.cost)}</b><span class="small">Rifle not included. Pack items add ${f1(t.pack/16)} lb</span></div>
+   <div class="tile"><span class="eyebrow">Elk limit</span><b>${y(am.elk)}<span>yd</span></b><span class="small">At ${f0(S.env.alt)} ft, set by ${am.why}. Sea level ${y(lo[0])} yd, 9,000 ft ${y(hi[0])} yd</span></div>
+   <div class="tile"><span class="eyebrow">Deer and hog limit</span><b>${y(am.deer)}<span>yd</span></b><span class="small">${am.n} at ${f0(am.mv16)} fps. Sea level ${y(lo[1])} yd, 9,000 ft ${y(hi[1])} yd</span></div>`;
+  $('#sheet').innerHTML=`<thead><tr><th>Item</th><th>In the build</th><th>Where</th><th class="n">Weight</th><th class="n">Cost</th><th>Link</th></tr></thead><tbody>
+   <tr><td>Rifle</td><td>Ridgeline FFT .308, 16 in</td><td>rifle</td><td class="n">86.4 oz</td><td class="n">gift</td><td>${linkHTML('Ridgeline FFT .308, 16 in','')}</td></tr>`+
+   t.lines.map(l=>`<tr><td>${l[4]==='kit'?l[0]:`<a href="#${l[4]}">${l[0]}</a>`}</td><td>${l[1]}</td><td>${l[5]||''}</td><td class="n">${l[2]==null?'':f1(l[2])+' oz'}</td><td class="n">${l[3]==null?'':(l[6]?'~':'')+'$'+f0(l[3])}</td><td>${linkHTML(l[1],'')}</td></tr>`).join('')+
+   `</tbody><tfoot><tr><td colspan="3">On the rifle ${(t.rifle/16).toFixed(2)} lb · in the pack ${f1(t.pack/16)} lb</td><td class="n">${f1(t.rifle)} oz</td><td class="n">$${f0(t.cost)}</td><td></td></tr></tfoot>`;
+}
+function renderKit(){
+  const am=picked('ammo'), cart=(am.gr+215)/437.5;
+  $('#kit').innerHTML=KIT.map(k=>{const oz=k.calc===1?cart*5:k.oz,u=k.calc===2?am.usd*5:k.usd;
+   return `<div class="kitem"><label><input type="checkbox" id="kit-${k.id}" data-kit="${k.id}" ${S.kit[k.id]?'checked':''}><span style="font-weight:500">${k.n} <span class="chip">${k.at}</span></span><span class="sp">${k.calc===2?'':(k.est?'~':'')+f1(oz)+' oz · '}${k.est?'~':''}$${f0(u)}</span><span class="nt">${k.nt}</span></label>${linkHTML(k.n)}</div>`}).join('');
+}
+
+/* ---------- charts ---------- */
+const E=(t,a,inner)=>`<${t} ${Object.entries(a).map(([k,v])=>`${k}="${v}"`).join(' ')}>${inner||''}</${t}>`;
+function axes(W,H,m,xs,ys,xt,yt,xl){
+  let h=''; yt.forEach(v=>{h+=E('line',{x1:m.l,x2:W-m.r,y1:ys(v),y2:ys(v),stroke:'var(--line)','stroke-width':1})+E('text',{x:m.l-6,y:ys(v)+4,'text-anchor':'end'},f0(v))});
+  xt.forEach(v=>{h+=E('text',{x:xs(v),y:H-m.b+16,'text-anchor':'middle'},v)}); h+=E('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle',fill:'var(--ink3)'},xl);
+  return h+E('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,stroke:'var(--line2)','stroke-width':1});
+}
+function drawScatter(){
+  const el=$('#scat'); if(!el)return; const W=460,H=250,m={l:40,r:16,t:14,b:38}, c=cat('can');
+  const xs=v=>m.l+(v-8)/(17-8)*(W-m.l-m.r), ys=v=>H-m.b-(v-40)/(60-40)*(H-m.t-m.b);
+  let h=axes(W,H,m,xs,ys,[8,10,12,14,16],[40,45,50,55,60],'Weight, oz')+E('text',{x:m.l,y:10,fill:'var(--ink3)'},'PEW rating, higher is quieter');
+  c.opts.filter(o=>o.pew).forEach(o=>{const on=S.pick.can===o.n,x=xs(o.oz),y=ys(o.pew),p=o.lp||'r';
+    const lx=p.includes('l')?x-9:p==='t'||p==='b'?x:x+9, ly=p.includes('t')?y-9:p==='b'?y+17:y+4, an=p.includes('l')?'end':p==='t'||p==='b'?'middle':'start';
+    h+=E('circle',{cx:x,cy:y,r:on?7:5.5,fill:on?'var(--data)':'var(--surface)',stroke:on?'var(--surface)':'var(--ctx)','stroke-width':2},`<title>${o.n}: PEW ${o.pew}, ${o.oz} oz, ${o.len} in</title>`)
+     +E('text',{x:lx,y:ly,'text-anchor':an,fill:on?'var(--ink)':'var(--ink2)','font-weight':on?500:400},o.n.replace(/^(Diligent Defense|Otter Creek|Thunder Beast|Liberty) /,''))});
+  el.innerHTML=h;
+}
+function drawLine(id,key,yt,ymax,lines,ro,unit){
+  const el=$(id),W=460,H=260,m={l:46,r:14,t:10,b:38}, am=picked('ammo'), all=cat('ammo').opts;
+  const xs=v=>m.l+v/700*(W-m.l-m.r), ys=v=>H-m.b-Math.min(v,ymax)/ymax*(H-m.t-m.b);
+  const path=o=>o.t.map((p,i)=>(i?'L':'M')+xs(p.r).toFixed(1)+','+ys(p[key]).toFixed(1)).join('');
+  let h=axes(W,H,m,xs,ys,[0,100,200,300,400,500,600,700],yt,'Range, yd');
+  lines.forEach(([v,lab])=>{h+=E('line',{x1:m.l,x2:W-m.r,y1:ys(v),y2:ys(v),stroke:'var(--warn)','stroke-width':1.2,'stroke-dasharray':'5 4'})+E('text',{x:W-m.r-2,y:ys(v)-4,'text-anchor':'end',fill:'var(--warn)'},lab)});
+  all.filter(o=>o!==am).forEach(o=>h+=E('path',{d:path(o),fill:'none',stroke:'var(--ctx)','stroke-width':1.2}));
+  h+=E('path',{d:path(am),fill:'none',stroke:'var(--data)','stroke-width':2.4,'stroke-linejoin':'round'});
+  h+=E('line',{class:'xh',x1:0,x2:0,y1:m.t,y2:H-m.b,stroke:'var(--ink3)','stroke-width':1,visibility:'hidden'})+E('circle',{class:'dot',r:5,fill:'var(--data)',stroke:'var(--surface)','stroke-width':2,visibility:'hidden'})
+    +E('rect',{class:'hit',x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'});
+  el.innerHTML=h; const base=`${am.n}: move over the chart to read a range`; $(ro).textContent=base;
+  const hit=el.querySelector('.hit'),xh=el.querySelector('.xh'),dot=el.querySelector('.dot');
+  const mv=ev=>{const b=el.getBoundingClientRect(),px=((ev.touches?ev.touches[0].clientX:ev.clientX)-b.left)/b.width*W;const r=Math.max(0,Math.min(700,Math.round((px-m.l)/(W-m.l-m.r)*70)*10)),p=am.t[r/10];
+    xh.setAttribute('x1',xs(r));xh.setAttribute('x2',xs(r));xh.setAttribute('visibility','visible');dot.setAttribute('cx',xs(r));dot.setAttribute('cy',ys(p[key]));dot.setAttribute('visibility','visible');
+    $(ro).textContent=`${r} yd: ${f0(p[key])} ${unit} · ${f0(key==='e'?p.v:p.e)} ${key==='e'?'fps':'ft-lb'}`;};
+  hit.addEventListener('pointermove',mv);hit.addEventListener('pointerdown',mv);
+  hit.addEventListener('pointerleave',()=>{xh.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');$(ro).textContent=base;});
+}
+function renderBallistics(){
+  const am=picked('ammo');
+  drawLine('#chE','e',[0,500,1000,1500,2000,2500],2600,[[S.env.elk,'elk floor'],[1000,'deer floor']],'#roE','ft-lb');
+  drawLine('#chV','v',[0,500,1000,1500,2000,2500],2800,[[am.floor,'assumed expansion floor']],'#roV','fps');
+  $('#dope').innerHTML=`<thead><tr><th class="n">Range</th><th class="n">Velocity</th><th class="n">Energy</th><th class="n">Path</th><th class="n">Come-up</th><th class="n">10 mph wind</th><th>On elk</th></tr></thead><tbody>`+
+   [100,200,300,400,500,600].map(r=>{const p=am.t[r/10],ok=r<=am.elk,dk=r<=am.deer;
+    return `<tr><td class="n">${r} yd</td><td class="n">${f0(p.v)} fps</td><td class="n">${f0(p.e)} ft-lb</td><td class="n">${p.path>0?'+':''}${f1(p.path)} in</td><td class="n">${r<=200?'0.0':f1(p.moa)} MOA</td><td class="n">${f1(p.drift)} in</td><td style="color:var(--${ok?'good':dk?'warn':'bad'})">${ok?'✓ Inside limit':dk?'△ Deer and hogs only':'✕ Past limit'}</td></tr>`}).join('')+'</tbody>';
+}
+function drawLook(){
+  const sc=picked('scope'),can=picked('can'),bp=picked('bipod'),mt=picked('mount'),P=15,x0=20,st='var(--line2)';
+  const rx=x0+20.5*P, mz=x0+36.5*P, cl=can.len*P, cx=mz-9, ob=sc.obj/25.4*P*1.18, cy=60;
+  const canFill=S.kit.cover&&S.cover?S.cover:can.hex;
+  let h=`<defs><clipPath id="stk"><path d="M20,92 L20,150 L96,141 L150,128 L176,152 L200,152 L213,113 L250,109 L462,105 L462,93 L215,93 L170,97 L120,92 Z"/></clipPath></defs>`;
+  h+=E('rect',{x:rx,y:84,width:mz-rx,height:11,fill:'#2b2d30',stroke:st,'stroke-width':1})+E('rect',{x:cx,y:78,width:cl,height:23,rx:3,fill:canFill,stroke:st,'stroke-width':1});
+  h+=`<g clip-path="url(#stk)"><rect x="0" y="80" width="480" height="90" fill="#4f5a41"/>${[[60,120,22,'#a68f66'],[140,105,16,'#1f211e'],[230,118,20,'#a68f66'],[320,100,15,'#1f211e'],[400,104,18,'#a68f66'],[95,146,14,'#1f211e'],[190,140,12,'#a68f66'],[440,96,9,'#1f211e']].map(b=>E('ellipse',{cx:b[0],cy:b[1],rx:b[2],ry:b[2]*.45,fill:b[3],opacity:.75})).join('')}</g>`;
+  h+=E('path',{d:'M20,92 L20,150 L96,141 L150,128 L176,152 L200,152 L213,113 L250,109 L462,105 L462,93 L215,93 L170,97 L120,92 Z',fill:'none',stroke:st,'stroke-width':1})+E('rect',{x:14,y:92,width:7,height:58,fill:'#1f211e',stroke:st,'stroke-width':1});
+  h+=E('rect',{x:215,y:79,width:rx-215+6,height:15,rx:2,fill:S.metal,stroke:st,'stroke-width':1})+E('path',{d:'M232,86 l-14,10 l-4,-4',fill:'none',stroke:S.metal,'stroke-width':4,'stroke-linecap':'round'});
+  if(mt.rail.includes('rail')) h+=E('rect',{x:222,y:75,width:rx-222,height:4,fill:mt.hex,stroke:st,'stroke-width':.8});
+  [250,304].forEach(x=>h+=E('rect',{x:x,y:cy-9,width:11,height:mt.rail.includes('rail')?24:28,fill:mt.hex,stroke:st,'stroke-width':.8}));
+  h+=E('rect',{x:196,y:cy-8,width:186,height:16,fill:sc.hex,stroke:st,'stroke-width':1})+E('rect',{x:182,y:cy-12,width:44,height:24,rx:3,fill:sc.hex,stroke:st,'stroke-width':1})
+    +E('path',{d:`M340,${cy-8} L372,${cy-ob/2} L398,${cy-ob/2} L398,${cy+ob/2} L372,${cy+ob/2} L340,${cy+8} Z`,fill:sc.hex,stroke:st,'stroke-width':1})+E('rect',{x:270,y:cy-17,width:16,height:9,rx:1.5,fill:sc.hex,stroke:st,'stroke-width':1});
+  if(bp.oz>0) h+=E('path',{d:'M452,105 L436,176 M452,105 L470,176',fill:'none',stroke:'#2a2b2d','stroke-width':4,'stroke-linecap':'round'});
+  h+=E('text',{x:cx+cl/2,y:122,'text-anchor':'middle'},`${can.len} in can`)+E('text',{x:(rx+mz)/2,y:74,'text-anchor':'middle'},'16 in barrel')+E('text',{x:290,y:28,'text-anchor':'middle'},sc.n.replace(/^(Swarovski|Leupold|Vortex|Zeiss|Maven|Nightforce) /,''));
+  $('#look').innerHTML=h;
+}
+const COVERS=['','#1d1e1f','#8a7453','#5a6247'],METALS=['#6e5a45','#9a9c9b','#222426'];
+function encodeBuild(){
+  const o={v:1,p:CATS.map(c=>Math.max(0,c.opts.findIndex(x=>x.n===S.pick[c.id]))),w:CATS.map(c=>c.crit.map(k=>S.w[c.id][k.k])),
+    k:KIT.map(k=>S.kit[k.id]?1:0).join(''),e:[S.env.alt,S.env.loss,S.env.elk],m:METALS.indexOf(S.metal),c:COVERS.indexOf(S.cover)};
+  return 'b.'+btoa(JSON.stringify(o)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeBuild(code){
+  let t=String(code||'').trim().replace(/^#/,''); const i=t.indexOf('b.'); if(i<0) throw 0; t=t.slice(i+2).replace(/[^A-Za-z0-9_-]/g,'');
+  const o=JSON.parse(atob(t.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((t.length+3)%4))); if(!o||o.v!==1) throw 0;
+  CATS.forEach((c,ci)=>{const opt=c.opts[o.p[ci]]; if(opt) S.pick[c.id]=opt.n; (o.w[ci]||[]).forEach((v,ki)=>{const k=c.crit[ki]; if(k&&v>=0&&v<=10) S.w[c.id][k.k]=+v;});});
+  KIT.forEach((k,ki)=>{if(o.k&&o.k[ki]!=null) S.kit[k.id]=o.k[ki]==='1';});
+  if(o.e){S.env.alt=+o.e[0];S.env.loss=+o.e[1];S.env.elk=+o.e[2];}
+  if(METALS[o.m]) S.metal=METALS[o.m]; if(o.c>=0) S.cover=COVERS[o.c];
+}
+function applyLoaded(){buildCats();buildEnv();$('#metal').value=S.metal;$('#cover').value=S.cover;renderAll();}
+function copyText(txt,msg,ok){const out=$('#copyOut');const fb=()=>{out.hidden=false;out.value=txt;out.focus();out.select();msg.textContent='Select all and copy the text in the box.';};
+  try{navigator.clipboard.writeText(txt).then(()=>{out.hidden=true;msg.textContent=ok;},fb);}catch(e){fb();}}
+function copyBuild(){
+  const t=totals(), am=t.am, lines=['Ridgeline FFT .308 16 in build',''];
+  lines.push('Rifle: Christensen Ridgeline FFT .308 Win, 16 in carbon, 1:10, 5/8x24');
+  t.lines.forEach(l=>{const L=linkFor(l[1]);lines.push(`${l[0]}: ${l[1]}${l[2]?` (${f1(l[2])} oz`:''}${l[3]?`${l[2]?', ':' ('}${l[6]?'~':''}$${f0(l[3])})`:l[2]?')':''}${L&&L.t==='View'?' '+L.u:''}`);});
+  lines.push('',`Rifle ready to hunt: ${(t.rifle/16).toFixed(2)} lb. Build cost: $${f0(t.cost)} (rifle not included).`,`${am.n} at ~${f0(am.mv16)} fps from 16 in: elk to ${am.elk} yd, deer to ${am.deer} yd at ${f0(S.env.alt)} ft.`);
+  lines.push('','To load this exact build on the page, paste this code into the build code box:',encodeBuild());
+  copyText(lines.join('\n'),$('#copyMsg'),'Copied, with the build code at the end. Paste it into a text or email.');
+}
+function renderAll(){computeAmmo();CATS.forEach(renderCat);renderSummary();renderKit();renderBallistics();drawLook();save();}
+
+/* ---------- init ---------- */
+$('#rifleSpec').innerHTML=RIFLE.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+$('#src').innerHTML=SRC.map(s=>`<li><a href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a></li>`).join('');
+const ENV=[['alt','Altitude, ft',0,11000,500],['loss','Velocity lost per inch of barrel under 24 in, fps',15,30,1],['elk','Elk energy floor, ft-lb',1200,1800,50]];
+const ALTS=[[0,'Sea level: Alaska, coastal'],[3000,'3,000 ft'],[6000,'6,000 ft'],[9000,'9,000 ft: high Rockies'],[11000,'11,000 ft']];
+function buildEnv(){$('#envSl').innerHTML=`<div style="grid-column:1/-1;display:flex;flex-direction:column;gap:6px"><span class="small">Hunt altitude. Thinner air carries the bullet farther, so sea level is the conservative case.</span><div class="alts">${ALTS.map(a=>`<button type="button" class="btn" data-alt="${a[0]}" aria-pressed="${S.env.alt===a[0]}">${a[1]}</button>`).join('')}</div></div>`+ENV.map(e=>`<div class="sl" style="grid-template-columns:1fr 54px"><label for="env-${e[0]}">${e[1]}</label><input type="range" id="env-${e[0]}" data-env="${e[0]}" min="${e[2]}" max="${e[3]}" step="${e[4]}" value="${S.env[e[0]]}"><output>${f0(S.env[e[0]])}</output></div>`).join('');}
+try{if(/^#b\./.test(location.hash)) decodeBuild(location.hash);}catch(e){}
+computeAmmo(); ensurePicks(false); buildCats(); buildEnv(); $('#metal').value=S.metal; $('#cover').value=S.cover; renderAll();
+document.addEventListener('input',ev=>{const t=ev.target;
+  if(t.dataset.k){S.w[t.dataset.c][t.dataset.k]=+t.value;t.nextElementSibling.textContent=t.value;renderCat(cat(t.dataset.c));save();}
+  else if(t.dataset.env){S.env[t.dataset.env]=+t.value;t.nextElementSibling.textContent=f0(+t.value);document.querySelectorAll('[data-alt]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.alt===S.env.alt));renderAll();}
+  else if(t.dataset.kit){S.kit[t.dataset.kit]=t.checked;renderSummary();drawLook();save();}
+  else if(t.id==='metal'){S.metal=t.value;drawLook();save();} else if(t.id==='cover'){S.cover=t.value;drawLook();save();}});
+document.addEventListener('click',ev=>{const r=ev.target.closest('.row'); if(r){S.pick[r.dataset.c]=r.dataset.n;renderAll();return;}
+  const ab=ev.target.closest('[data-alt]'); if(ab){S.env.alt=+ab.dataset.alt;buildEnv();renderAll();return;}
+  if(ev.target.id==='copy'){copyBuild();return;}
+  if(ev.target.id==='codeCopy'){copyText(encodeBuild(),$('#codeMsg'),'Build code copied.');return;}
+  if(ev.target.id==='codeLoad'){const prev=JSON.stringify(S);try{decodeBuild($('#codeIn').value);applyLoaded();$('#codeMsg').textContent='Build loaded.';}catch(e){S=JSON.parse(prev);$('#codeMsg').textContent='That code did not read. Copy the whole line starting with b. and try again.';}return;}
+  if(ev.target.id==='reset'){S=JSON.parse(JSON.stringify(DEF));computeAmmo();ensurePicks(true);buildCats();buildEnv();$('#metal').value=S.metal;$('#cover').value=S.cover;renderAll();}});
+</script>
+
+</body></html>
