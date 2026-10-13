@@ -226,6 +226,26 @@ ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;m
 .aes div{background:var(--sunk);border-radius:8px;padding:12px 14px;font-size:13.5px;color:var(--ink2)}
 .aes b{display:block;color:var(--ink);margin-bottom:2px}
 .readout{font-size:12.5px;color:var(--ink2);min-height:18px}
+.verdict{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;font-size:15px;line-height:1.55;max-width:82ch;color:var(--ink)}
+.verdict .vl{display:block;font-family:var(--f-display);font-weight:700;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.builds{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.bld{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);min-width:0}
+.bld.rec{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft),var(--shadow)}
+.bld.on{background:var(--accent-soft)}
+.bld h3{font-size:19px}
+.bld .why{font-size:13.5px;color:var(--ink2);line-height:1.5}
+.bld ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.bld li{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px}
+.bld li span:first-child{color:var(--ink3);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding-top:2px}
+.bld li span:last-child{font-weight:600}
+.bld .bm{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto}
+.bld .bm div{background:var(--sunk);border-radius:7px;padding:7px 9px;min-width:0}
+.bld.on .bm div{background:var(--surface)}
+.bld .bm .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.bld .bm .v{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:-.01em}
+.bld .btn{align-self:flex-start}
+.bld .btn[disabled]{opacity:.7;cursor:default}
+.more{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--ink2)}
 </style>
 
 </head>
@@ -237,7 +257,7 @@ ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;m
 
 <div class="shell">
 <aside class="panel" id="panel" aria-label="Your build">
-  <div class="ph"><h2>Your build</h2><span class="tiny faint">Oct 12, 2026 prices</span></div>
+  <div class="ph"><h2>Your build</h2><span class="tiny faint" id="bmatch"></span></div>
   <div id="panelArt"></div>
   <div class="tiles" id="tiles"></div>
   <div><div class="wbar" id="wbar"></div><div class="legend" id="wleg" style="margin-top:6px"></div></div>
@@ -269,15 +289,21 @@ ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px;m
   <div class="copy">
     <span class="eyebrow">Christensen Arms Ridgeline FFT · .308 Win · 16 in carbon</span>
     <h1>Build your Ridgeline</h1>
-    <p class="lede">A backcountry rifle, one piece at a time. Every part is rendered to scale, priced from a live listing, measured where someone has measured it, and ranked by what you weight. Pick a part and the whole rifle updates.</p>
+    <p class="lede">A backcountry rifle, one piece at a time. Start from a recommended build, then see what every swap costs in ounces, dollars and decibels. Every part is drawn to scale, priced from a live listing and measured where someone has measured it.</p>
   </div>
   <div class="hero-art" id="heroArt"></div>
 </header>
 <div class="how">
-  <div><b>Set your priorities</b>Each step has sliders. Move them and the ranking reorders.</div>
-  <div><b>Add parts to the build</b>One pick per step. The build panel keeps the running totals and the carry weight.</div>
+  <div><b>Start with the shortlist</b>Four complete builds below, one of them recommended. Load one, then change only what you disagree with.</div>
+  <div><b>Every step has a verdict</b>The call and the one or two alternatives worth a look. The top three by your sliders are shown; the rest are a click away.</div>
   <div><b>Share it</b>Copy the build as text or a short code so a friend can load your exact rifle.</div>
 </div>
+
+<section class="step" id="start">
+  <div class="step-head"><span class="eyebrow">Start here</span><h2>Four ways to build it, and the one I would</h2><p class="lead">Each is a complete rifle. The numbers are computed for the altitude and position set in step 05, so they move with the rest of the page. Load one and the build panel fills in; every step below then shows you what you could swap and what it costs in ounces, dollars and decibels.</p></div>
+  <div class="builds" id="builds"></div>
+  <p class="small muted" style="max-width:80ch">Hunting weight includes the rifle with the brake off, scope, rings, can, bipod, sling, cover, level, caps and five rounds. Cost is everything in the build except the rifle, including the kit and five boxes of ammunition.</p>
+</section>
 
 <section class="step" id="rifle">
   <div class="step-head"><span class="eyebrow">Step 00</span><h2>The rifle you start with</h2><p class="lead">Christensen's lightest production action in a short, suppressor-ready barrel, in the black carbon stock with tan and green accents. The carbon barrel and stock are why the rest of this build stays light: every ounce added here is felt on the climb.</p></div>
@@ -884,10 +910,12 @@ function buildSteps(){
     const post=c.id==='can'?`<div class="block"><h3>Carry mode <small>what is on the muzzle for the walk in; the build panel shows both weights</small></h3><div class="modes" id="modes"></div><h3 style="margin-top:6px">Suppressor cover <small>drawn on the rifle and used in the color advice</small></h3><div class="swatches" id="coverSw"></div></div>`:'';
     return `<section class="step" id="${c.anchor}">
     <div class="step-head"><span class="eyebrow">Step ${c.no}</span><h2>${c.title}${c.optional?' <span class="tag" style="vertical-align:middle">optional</span>':''}</h2><p class="lead">${c.lead}</p></div>
+    <div class="verdict"><span class="vl">Verdict</span>${VERDICT[c.id]||''}</div>
     <div class="guide">${c.guide.map(g=>`<div><b>${g[0]}</b>${g[1]}</div>`).join('')}</div>
     <div class="block"><h3>Your priorities <small>0 to 10; the ranking follows</small></h3><div class="tune">${c.crit.map(k=>`<div class="sl"><label for="w-${c.id}-${k.k}">${k.l}${k.mine?' <span class="tag">my rating</span>':''}</label><input type="range" min="0" max="10" step="1" id="w-${c.id}-${k.k}" data-c="${c.id}" data-k="${k.k}" value="${S.w[c.id][k.k]}"><output>${S.w[c.id][k.k]}</output></div>`).join('')}</div></div>
     ${pre}
     <div class="cards" id="cards-${c.id}"></div>
+    <div class="more" id="more-${c.id}"></div>
     ${post}
     <div id="cmp-${c.id}" style="display:flex;flex-direction:column;gap:18px"></div>
   </section>`}).join('');
@@ -919,10 +947,14 @@ function compareShell(c){
   return h+`<details class="specs"><summary>All ${c.title.toLowerCase()} specs</summary><div class="scroll" id="tbl-${c.id}"></div></details>`;
 }
 function renderCat(c){
-  const r=rank(c),un=c.opts.filter(o=>o.unscored),vis=c.id==='scope'?r.filter(o=>S.sf==='all'||o.grp===S.sf):r;
-  let h=vis.map((o,i)=>cardHTML(c,o,i===0)).join('');
-  if(un.length)h+=`<div class="divider">${c.id==='can'?'No independent test, so not scored on sound':'Not scored'}</div>`+un.map(o=>cardHTML(c,o,false)).join('');
+  const r=rank(c),un=c.opts.filter(o=>o.unscored),vis=c.id==='scope'?r.filter(o=>S.sf==='all'||o.grp===S.sf):r,pk=S.pick[c.id],all=vis.length+un.length;
+  let show=MORE[c.id]?vis:vis.filter(o=>o.flag!=='Discontinued').slice(0,3);if(!MORE[c.id]&&!show.some(o=>o.n===pk)){const p=vis.find(o=>o.n===pk);if(p)show=show.concat(p);}
+  const unShow=MORE[c.id]?un:un.filter(o=>o.n===pk);
+  let h=show.map((o,i)=>cardHTML(c,o,i===0)).join('');
+  if(unShow.length)h+=`<div class="divider">${c.id==='can'?'No independent test, so not scored on sound':'Not scored'}</div>`+unShow.map(o=>cardHTML(c,o,false)).join('');
   $('#cards-'+c.id).innerHTML=h;
+  const shown=show.length+unShow.length;
+  $('#more-'+c.id).innerHTML=shown<all?`<span>Showing the top ${show.length} of ${all} by your sliders${show.length>3?', plus your pick':''}.</span><button class="btn" type="button" data-more="${c.id}">Show all ${all}</button>`:(all>3?`<span>All ${all} shown.</span><button class="btn" type="button" data-more="${c.id}">Back to the top 3</button>`:'');
   if(c.id==='scope')$$('[data-sf]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sf===S.sf));
   renderCompare(c);renderTable(c);
 }
@@ -971,6 +1003,36 @@ function renderTable(c){
   const fmt=(col,o)=>{const v=o[col[1]];const f=col[2];if(typeof f==='function')return f(v,o);if(f==='oz')return v!=null?f1(v)+' oz':'—';if(f==='in')return v!=null?v+' in':'—';if(f==='$')return v!=null?money(o):'—';return v!=null?v:'—';};
   const num=col=>['oz','len','dia','usd','pew','pewM','pewE','minb','cant','gr','bc','mv','mv16','floor','elk','deer','coy','hp600','drift','yd','hr','fovL','elev','lt','er','smt','smtE','oal','ep'].includes(col[1]);
   $('#tbl-'+c.id).innerHTML=`<table><thead><tr>${cols.map(col=>`<th${num(col)?' class="n"':''}>${col[0]}</th>`).join('')}</tr></thead><tbody>${c.opts.map(o=>`<tr${S.pick[c.id]===o.n?' class="sel"':''}>${cols.map(col=>`<td${num(col)?' class="n"':''}>${col[1]==='n'?(o.u?`<a href="${o.u}" target="_blank" rel="noopener">${esc(o.n)}</a>`:esc(o.n)):fmt(col,o)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+/* ------------------------------------------------------------------ shortlist: complete builds and per-step verdicts */
+const MORE={};
+const BUILDS=[
+ {id:'pick',n:'The pick',rec:1,why:'Does both jobs with the least compromise: 3.5x for timber and 28x for a coyote, the best glass here at dusk, a 9.6 oz can the Summit measured quieter at your ear than the lighter competition, and a bipod that lives in a pocket.',
+  p:{scope:'Swarovski Z8i 3.5-28x50 P',mount:'Talley Lightweight Alloy one-piece',can:'Dead Air Nomad Ti XC',ammo:'Nosler Trophy Grade 165 gr AccuBond',rf:'Leica Geovid Pro 10x32',bipod:'Spartan Javelin Lite + Classic adapter',thermal:'None for now'}},
+ {id:'light',n:'Lightest with proven parts',why:'Drops 2.5 oz of scope and the bipod. Gives up the 600 yd coyote magnification and steadiness past 300 yd, keeps the Swarovski glass and the same can. Every part here has been measured by someone other than its maker.',
+  p:{scope:'Swarovski Z5i+ 3.5-18x50 BT',mount:'Talley Lightweight Alloy one-piece',can:'Dead Air Nomad Ti XC',ammo:'Nosler Trophy Grade 165 gr AccuBond',rf:'Leica Geovid Pro 10x32',bipod:'No bipod, shoot off the pack',thermal:'None for now'}},
+ {id:'quiet',n:'Quietest at your ear',why:'The Nomad-LTi XC measured 124.4 dBA at the ear and 132.6 at the muzzle in the Summit, second and tied-first, for 1.4 oz and 2 in over the Nomad Ti XC. The 10x42 Geovid buys the last ten minutes of light for 5 oz.',
+  p:{scope:'Swarovski Z8i 3.5-28x50 P',mount:'Talley Lightweight Alloy one-piece',can:'Dead Air Nomad-LTi XC',ammo:'Nosler Trophy Grade 165 gr AccuBond',rf:'Leica Geovid Pro 10x42',bipod:'Spartan Javelin Lite + Classic adapter',thermal:'None for now'}},
+ {id:'value',n:'Same rifle for $2,100 less',why:'The Vortex LHT 4.5-22x50 is first focal plane, 21.7 oz and $1,499; the Enticer L-Ti is $865 and among the quietest at the muzzle in both programs. You give up the 3.5x low end, some glass at dusk, and 3 dB at the ear.',
+  p:{scope:'Vortex Razor HD LHT 4.5-22x50 FFP',mount:'Talley Lightweight Alloy one-piece',can:'Diligent Defense Enticer L-Ti',ammo:'Nosler Trophy Grade 165 gr AccuBond',rf:'Leica Geovid Pro 10x32',bipod:'Spartan Javelin Lite + Classic adapter',thermal:'None for now'}}];
+const VERDICT={
+ scope:'<b>Swarovski Z8i 3.5-28x50.</b> The one scope here that does both jobs: 3.5x and 36 ft of view for timber, 28x for a coyote at 600, 93% light transmission for the last ten minutes, 23.5 oz. Add the BTF turret for a zero stop. If $3,500 is more than the job deserves, the <b>Vortex Razor HD LHT 4.5-22x50</b> is 21.7 oz, first focal plane and $1,499, and gives up only the low end and some glass; if elk is really the whole job, the <b>Z5i+ 3.5-18x50</b> at 21 oz is the lightest proven glass. The model says magnification barely moves a 600 yd coyote (18x to 28x is one point of hit chance); your wind call and position move it from 17% to 50%.',
+ mount:'<b>Talley one-piece, 30 mm, medium.</b> Four ounces, $43, nothing to work loose, fits every 30 mm scope here. Spend more only if you want a rail under the scope for a thermal clip-on later; then Seekins rings on the Christensen rail.',
+ can:'<b>Dead Air Nomad Ti XC.</b> 9.6 oz and 6.7 in with the direct-thread mount installed, and the Summit measured it quieter at your ear than the Enticer L-Ti and the Ultra 7. Want quieter? The <b>Nomad-LTi XC</b> is 1.4 oz and 2 in more and the quietest proven can here at the ear after the Hydrogen-L, tied-quietest at the muzzle. Want lighter? The <b>Scythe-Ti</b> is 2.3 oz less, but nobody independent has measured it. Chris’s <b>CAT JL</b> is a fine can at 13.2 oz, with a 16 in minimum barrel that leaves no margin on yours.',
+ ammo:'<b>Nosler 165 gr AccuBond.</b> It leaves the 16.25 in barrel fastest of the bonded loads and reaches farthest on elk at every altitude: 320 yd at sea level and 430 at 9,000 ft on the 1,500 ft-lb floor. The <b>Terminal Ascent 175</b> is the tougher bullet and the better choice if you would rather give up 40 to 60 yd of reach for it. Either way, chronograph the rifle with the can on and zero with the load you will hunt.',
+ rf:'<b>Leica Geovid Pro 10x32</b> if pack weight rules; the <b>10x42</b> if elk at last light rules. Both carry Applied Ballistics onboard, which is the feature that matters for a long coyote, and both out-glass the Sig. Every handheld here still needs a binocular, so it ends up heavier and dearer.',
+ bipod:'<b>Spartan Javelin Lite with the Classic adapter.</b> Six ounces, lives in a pocket, snaps onto the front stud in a second. The Harris is steadier and bolts straight on, at more than twice the weight; take it only if the rifle will spend its life prone in open country.',
+ thermal:'<b>None for now.</b> Nothing else in the build depends on it. If pigs become a regular thing, the <b>Steiner Nighthunter C35 Gen II</b> is the 640-class clip-on for the least money.'};
+function evalBuild(p){const keep=JSON.stringify(S.pick);Object.assign(S.pick,p);computeAll();const t=totals(),am=picked('ammo');const r={hunt:t.hunt,carry:t.carry,cost:t.cost,elk:am.elk,coy:am.coy,hp600:am.hp600};S.pick=JSON.parse(keep);computeAll();return r;}
+const buildMatch=b=>Object.entries(b.p).every(([k,v])=>S.pick[k]===v);
+function renderBuilds(){
+  $('#builds').innerHTML=BUILDS.map(b=>{const e=evalBuild(b.p),on=buildMatch(b);
+   return `<div class="bld${b.rec?' rec':''}${on?' on':''}"><div class="badges">${b.rec?'<span class="tag top">Recommended</span>':''}${on?'<span class="tag in">This is your build</span>':''}</div><h3>${b.n}</h3><p class="why">${b.why}</p>
+    <ul>${CATS.map(c=>{const o=c.opts.find(x=>x.n===b.p[c.id]);return `<li><span>${c.id==='mount'?'Rings':c.id==='thermal'?'Thermal':c.title}</span><span>${esc(o?(o.short||o.n):'?')}</span></li>`}).join('')}</ul>
+    <div class="bm"><div><div class="l">Hunting</div><div class="v num">${(e.hunt/16).toFixed(2)} lb</div></div><div><div class="l">Cost</div><div class="v num">$${f0(e.cost)}</div></div><div><div class="l">Elk reach</div><div class="v num">${e.elk>=700?'700+':e.elk} yd</div></div><div><div class="l">Coyote at 600</div><div class="v num">${f0(e.hp600*100)}%</div></div></div>
+    <button class="btn${on?'':' primary'}" type="button" data-build="${b.id}"${on?' disabled':''}>${on?'Loaded':'Load this build'}</button></div>`}).join('');
+  const m=BUILDS.find(buildMatch);$('#bmatch').textContent=m?m.n+(m.rec?', recommended':''):'Custom build';
 }
 
 /* ------------------------------------------------------------------ what you see through each scope */
@@ -1043,7 +1105,7 @@ function renderSummary(){
   ].map(a=>`<div><b>${a[0]}</b>${a[1]}</div>`).join('');
 }
 function renderMetal(){$('#metalSw').innerHTML=METALS.map((m,i)=>`<button class="sw" type="button" data-metal="${i}" aria-pressed="${S.metal===i}"><i style="background:linear-gradient(180deg,${RAMPS[m[1]][0]},${RAMPS[m[1]][2]} 60%,${RAMPS[m[1]][4]})"></i>${m[0]}</button>`).join('');}
-function renderAll(){computeAll();CATS.forEach(renderCat);renderPanel();renderKit();renderBallistics();renderSummary();renderMetal();$('#rifleArt').innerHTML=rifleSVG('r',true);$$('[data-alt]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.alt===S.env.alt));$$('[data-pos]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pos===S.env.pos));save();}
+function renderAll(){computeAll();CATS.forEach(renderCat);renderPanel();renderBuilds();renderKit();renderBallistics();renderSummary();renderMetal();$('#rifleArt').innerHTML=rifleSVG('r',true);$$('[data-alt]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.alt===S.env.alt));$$('[data-pos]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pos===S.env.pos));save();}
 
 /* ------------------------------------------------------------------ share */
 function encodeBuild(){const o={v:3,p:CATS.map(c=>Math.max(0,c.opts.findIndex(x=>x.n===S.pick[c.id]))),w:CATS.map(c=>c.crit.map(k=>S.w[c.id][k.k])),k:KIT.map(k=>S.kit[k.id]?1:0).join(''),e:[S.env.alt,S.env.loss,S.env.elk,S.env.pos,S.env.wind],m:S.metal,c:S.cover,cr:S.carry};return 'b.'+btoa(JSON.stringify(o)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
@@ -1065,6 +1127,7 @@ function buildText(){const t=totals(),am=t.am,cm=CARRY.find(c=>c[1]===S.carry),l
 /* ------------------------------------------------------------------ init and events */
 $('#rifleSpec').innerHTML=RIFLE.spec.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
 $('#src').innerHTML=SRC.map(g=>`<li style="list-style:none;margin-left:-18px;font-weight:700;margin-top:6px">${g[0]}</li>`+g[1].map(s=>`<li><a href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a></li>`).join('')).join('');
+Object.assign(DEF.pick,BUILDS[0].p);Object.assign(S.pick,BUILDS[0].p);
 try{const s=JSON.parse(localStorage.getItem('fftBuild3')||'null');if(s&&s.w&&s.pick){Object.keys(DEF.w).forEach(c=>Object.assign(S.w[c],s.w[c]||{}));Object.assign(S.pick,s.pick);Object.assign(S.kit,s.kit||{});Object.assign(S.env,s.env||{});if(METALS[s.metal])S.metal=s.metal;if(COVERS[s.cover])S.cover=s.cover;if(CARRY.some(c=>c[1]===s.carry))S.carry=s.carry;if(['all','lo','hi'].includes(s.sf))S.sf=s.sf;}}catch(e){}
 try{if(/^#b\./.test(location.hash))decodeBuild(location.hash);}catch(e){}
 function rebuildAll(){computeAll();ensurePicks(false);computeAll();buildSteps();buildEnv();renderAll();}
@@ -1082,6 +1145,8 @@ document.addEventListener('click',ev=>{
   const ms=ev.target.closest('[data-metal]');if(ms){S.metal=+ms.dataset.metal;renderAll();return;}
   const cs=ev.target.closest('[data-cover]');if(cs){S.cover=+cs.dataset.cover;renderAll();return;}
   const cr=ev.target.closest('[data-carry]');if(cr){S.carry=cr.dataset.carry;renderAll();return;}
+  const bl=ev.target.closest('[data-build]');if(bl){const b=BUILDS.find(x=>x.id===bl.dataset.build);if(b){Object.assign(S.pick,b.p);renderAll();$('#pstatus').textContent='Loaded: '+b.n+'.';}return;}
+  const mr=ev.target.closest('[data-more]');if(mr){MORE[mr.dataset.more]=!MORE[mr.dataset.more];renderCat(cat(mr.dataset.more));return;}
   const sf=ev.target.closest('[data-sf]');if(sf){S.sf=sf.dataset.sf;renderCat(cat('scope'));save();return;}
   const vw=ev.target.closest('[data-view]');if(vw){VIEW=vw.dataset.view;renderViews(cat('scope').opts.filter(o=>S.sf==='all'||o.grp===S.sf));return;}
   const zm=ev.target.closest('[data-zoom]');if(zm){ZOOM=+zm.dataset.zoom;renderViews(cat('scope').opts.filter(o=>S.sf==='all'||o.grp===S.sf));return;}
@@ -1090,7 +1155,7 @@ document.addEventListener('click',ev=>{
   else if(id==='codeCopy'){copyText(encodeBuild(),'Build code copied.');}
   else if(id==='codeShow'){const b=$('#codebox');b.hidden=!b.hidden;ev.target.setAttribute('aria-expanded',String(!b.hidden));if(!b.hidden)$('#codeIn').focus();}
   else if(id==='codeLoad'){const prev=JSON.stringify(S);try{decodeBuild($('#codeIn').value);rebuildAll();$('#pstatus').textContent='Build loaded.';}catch(e){S=JSON.parse(prev);$('#pstatus').textContent='That code did not read. Copy the whole line starting with b. and try again.';}}
-  else if(id==='reset'){S=JSON.parse(JSON.stringify(DEF));computeAll();ensurePicks(true);computeAll();buildSteps();buildEnv();renderAll();$('#pstatus').textContent='Back to the top-scoring picks.';}
+  else if(id==='reset'){S=JSON.parse(JSON.stringify(DEF));computeAll();ensurePicks(false);computeAll();buildSteps();buildEnv();renderAll();$('#pstatus').textContent='Back to the recommended build and the default sliders.';}
   else if(id==='mbarToggle'){const p=$('#panel');p.classList.toggle('open');ev.target.setAttribute('aria-expanded',String(p.classList.contains('open')));ev.target.textContent=p.classList.contains('open')?'Hide build':'Your build';if(p.classList.contains('open'))p.scrollIntoView({block:'start'});}
 });
 </script>
